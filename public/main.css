@@ -163,8 +163,8 @@ td{
   overflow: hidden;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
   background: url("./images/image.png");
-  background-size: cover; /* This is the background version of 'object-fit: cover' */
-  background-position: center; /* Keeps the design centered */
+  background-size: cover; 
+  background-position: center;
   background-repeat: no-repeat;
   position: relative;
   display: flex;
