@@ -1,0 +1,123 @@
+import express from "express";
+import bodyParser from "body-parser";
+import axios from "axios";
+import multer from "multer";
+import FormData from "form-data";
+
+const app = express();
+const port = 6060;
+const API_URL = "http://localhost:5000";
+
+const upload = multer({ storage: multer.memoryStorage() });
+
+app.use(express.static("public"));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+app.get("/", async (req, res) => {
+  try {
+    res.render("index");
+  } catch (error) {
+    res.status(500).json({ message: "Error " });
+  }
+});
+
+app.get("/api/register", async (req, res) => {
+  try {
+    res.render("register.ejs");
+  } catch (error) {
+    res.status(500).json({ message: "Error " });
+  }
+});
+
+app.get("/API/SIGNUP", async (req, res) => {
+  try {
+    res.render("signup.ejs");
+  } catch (error) {
+    res.status(500).json({ message: "Error " });
+  }
+});
+
+app.get("/login", async (req, res) => {
+  try {
+    res.render("login.ejs");
+  } catch (error) {
+    res.status(500).json({ message: "Error " });
+  }
+});
+
+app.post("/API/LOGIN", async (req, res) => {
+  try {
+    const response = await axios.post(`${API_URL}/LOGIN`, req.body);
+
+    console.log("Login Success:", response.data);
+
+    res.send(
+      '<script>alert("Login Successful!"); window.location.href = "/";</script>',
+    );
+  } catch (error) {
+    console.error(
+      "Login Failed:",
+      error.response ? error.response.data : error.message,
+    );
+    res
+      .status(401)
+      .send(
+        '<script>alert("Invalid Phone or Password"); window.location.href = "/login";</script>',
+      );
+  }
+});
+
+app.post("/API/SIGNUP", async (req, res) => {
+  try {
+    const response = await axios.post(`${API_URL}/SIGNUP`, req.body);
+    console.log("API Response:", response.data);
+    res.send(
+      '<script>alert("Signup Successful"); window.location.href = "/login";</script>',
+    );
+  } catch (error) {
+    console.error("Proxy Error:", error.message);
+    res
+      .status(500)
+      .send(
+        '<script>alert("Error signing up"); window.location.href = "/API/SIGNUP";</script>',
+      );
+  }
+});
+
+app.post("/api/register", upload.single("photo"), async (req, res) => {
+  try {
+    const form = new FormData();
+
+    // Add all the text fields (name, email, etc.)
+    for (const key in req.body) {
+      form.append(key, req.body[key]);
+    }
+
+    if (req.file) {
+      form.append("photo", req.file.buffer, req.file.originalname);
+    }
+
+    const response = await axios.post(`${API_URL}/register`, form, {
+      headers: {
+        ...form.getHeaders(),
+      },
+    });
+
+    console.log("API Response:", response.data);
+    res.send(
+      '<script>alert("Registration Successful"); window.location.href = "/";</script>',
+    );
+  } catch (error) {
+    console.error("Proxy Error:", error.message);
+    res
+      .status(500)
+      .send(
+        '<script>alert("Error Registering"); window.location.href = "/";</script>',
+      );
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Frontend Server is running on http://localhost:${port}`);
+});
