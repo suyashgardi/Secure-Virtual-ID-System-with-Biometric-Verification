@@ -64,7 +64,8 @@ async def liveness_endpoint(websocket: WebSocket):
                     try:
                         print("Checking database for duplicate faces...")
                     
-                        req = urllib.request.Request("http://localhost:5000/api/preusers")
+                        NODE_API_URL = os.environ.get("NODE_API_URL", "http://localhost:5000")
+                        req = urllib.request.Request(f"{NODE_API_URL}/api/preusers")
                         with urllib.request.urlopen(req) as response:
                             existing_users = json.loads(response.read().decode())
                             
