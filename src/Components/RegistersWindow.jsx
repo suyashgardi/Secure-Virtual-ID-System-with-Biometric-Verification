@@ -5,7 +5,7 @@ import Slideshow from "./slideShow";
 import RegistredUsers from "./RgisteredUsers";
 import DownloadId from "./DownloadId";
 import UpdateUser from "../Components/updateUser";
-import API from '../../../api.js';
+import API from '../../api.js';
 
 function People() {
   const [idCards, setIdCards] = useState([]);
