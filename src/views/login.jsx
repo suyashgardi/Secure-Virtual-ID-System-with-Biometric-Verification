@@ -1,54 +1,36 @@
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
 import LoginForm from "../Components/FormComponents/LoginForm";
-import API from "../../api.js";
+import API from '../../api.js';
 
-// import ForgotPassword from"../Components/FormComponents/ForgotPassword";
 axios.defaults.withCredentials = true;
 
-
 function Login() {
-  const [formData, setFormData] = useState({
-    phone: "",
-    password: "",
-  });
-  const [forgotPassword, setForgotPassword]=useState(false);
-  console.log("REACT IS SENDING:", { formData });
+  const [formData, setFormData] = useState({ phone: "", password: "" });
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${API}/api/sessions`, formData);
-      const loggedInUser = response.data.user;
-      localStorage.setItem("user", JSON.stringify(loggedInUser));
+      const response = await axios.post(`${API}/api/sessions`, formData, { withCredentials: true });
+      localStorage.setItem("user", JSON.stringify(response.data.user));
       navigate('/dashboard');
     } catch (error) {
-      console.error("Login error:", error);
-
       alert(error.response?.data?.error || "Login Failed! Please try again.");
     }
   };
-  const handleForgotPassword=()=>{
-    navigate('/recover')
-    
-  }
 
+  const handleForgotPassword = () => navigate('/recover');
 
   return (
     <div>
-      {!forgotPassword && <LoginForm formData={formData} handleChange={handleChange} handleSubmit={handleSubmit} forgotPassword={handleForgotPassword}/>}
-      
+      <LoginForm formData={formData} handleChange={handleChange} handleSubmit={handleSubmit} forgotPassword={handleForgotPassword} />
     </div>
-    
   );
 }
 
