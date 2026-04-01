@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
 import ForgotPassword from "../Components/FormComponents/ForgotPassword";
+import API from '../../api.js';
 
 
 import { useVerification } from "../CustomHooks/verification"; 
@@ -42,7 +43,7 @@ function Recover() {
         ...formData,
         resetToken: resetToken 
       };
-      const response = await axios.patch('/api/newpassword', token);
+      const response = await axios.patch(`${API}/api/newpassword`, token);
       if (response) {
         alert(response.data.message);
         navigate("/login");
