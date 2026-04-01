@@ -50,8 +50,8 @@ async function verifyEmail(email) {
     email: email,
     validateRegex: true,
     validateMx: false,
-    validateTypo: true,
-    validateDisposable: true,
+    validateTypo: false,
+    validateDisposable: false,
     validateSMTP: false,
   });
   if (!result.valid) {
