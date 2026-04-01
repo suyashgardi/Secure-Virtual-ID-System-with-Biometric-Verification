@@ -2,7 +2,7 @@ import { useNavigate, Link, Navigate } from "react-router-dom";
 import { useState } from "react";
 import SignupForm from "../Components/FormComponents/SignupForm";
 import axios from "axios";
-import API from '../api.js';
+import API from '../../api.js';
 
 function Signup() {
   const [formData, setFormData] = useState({
