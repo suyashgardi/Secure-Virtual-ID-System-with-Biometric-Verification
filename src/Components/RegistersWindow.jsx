@@ -6,9 +6,10 @@ import Slideshow from "./slideShow";
 import RegistredUsers from "./RgisteredUsers";
 import DownloadId from "./DownloadId";
 import UpdateUser from "../Components/updateUser";
+import {GetUsers} from "../CustomHooks/getUsers"
 
 function People() {
-  const [idCards, setIdCards] = useState([]);
+  const [idCards ,setIdCards]=GetUsers()
   const [showCards, setShowCards] = useState(false);
   const [regiForm, setRegiForm] = useState(false);
   const [showSlides, setShowSlides] = useState(true);
@@ -26,9 +27,7 @@ function People() {
 
   const handleGetdata = async () => {
     try {
-      const response = await axios.get("/api/userids");
-      setIdCards(response.data);
-      console.log(response.data);
+
       setShowCards(true);
       setRegiForm(false);
       setShowSlides(false);
@@ -41,9 +40,6 @@ function People() {
 
   const handleDownload = async () => {
     try {
-      const response = await axios.get("/api/userids");
-      setIdCards(response.data);
-      console.log(response.data);
       setShowCards(false);
       setRegiForm(false);
       setShowSlides(false);
@@ -53,9 +49,6 @@ function People() {
   };
   const handleUpdate = async () => {
     try {
-      const response = await axios.get("/api/userids");
-      setIdCards(response.data);
-      console.log(response.data);
       setShowCards(false);
       setRegiForm(false);
       setShowSlides(false);
