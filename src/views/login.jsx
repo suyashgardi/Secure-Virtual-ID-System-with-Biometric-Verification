@@ -2,6 +2,8 @@ import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
 import LoginForm from "../Components/FormComponents/LoginForm";
+import API from "../../api.js";
+
 // import ForgotPassword from"../Components/FormComponents/ForgotPassword";
 axios.defaults.withCredentials = true;
 
@@ -25,7 +27,7 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("/api/sessions", formData);
+      const response = await axios.post(`${API}/api/sessions`, formData);
       const loggedInUser = response.data.user;
       localStorage.setItem("user", JSON.stringify(loggedInUser));
       navigate('/dashboard');
