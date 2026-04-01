@@ -14,7 +14,7 @@ function Signup() {
     confirm_password: "",
     otp: "",
     action: "",
-    caller:"",
+    caller:"signupform",
   });
   const [isValidated, setIsValidated] = useState(false);
   const [isSent, setIsSent] = useState(false);
@@ -26,47 +26,9 @@ function Signup() {
     });
   };
 
-  const handleSendOTP = async (e) => {
-    console.log("triggered SendOTP")
-    e.preventDefault();
-
-    const actiondata = {
-      ...formData,
-      email: formData.email.trim(),
-      action: "Send OTP",
-      caller:"signupform"
-    };
-    setFormData(actiondata);
-    try {
-      const response = await axios.post(`${API}/api/validation`, actiondata);
-      if (response.data.isSent) {
-        setIsSent(true);
-        alert(response.data.message);
-      }
-    } catch (error) {
-      const errorMessage = error.response?.data?.message;
-      alert(errorMessage);
-    }
-  };
-
-  const handleVerification = async (e) => {
-    e.preventDefault();
-    
-    const actiondata = {
-      ...formData,
-      action: "verify OTP",
-    };
-    setFormData(actiondata);
-    try {
-      const response = await axios.post(`${API}/api/validation`, actiondata);
-      if (response.data.isVerified) {
-        setIsValidated(true);
-      }
-    } catch (error) {
-      const errorMessage = error.response?.data?.message;
-      alert(errorMessage);
-    }
-  };
+  const { isEmail, isVerified, resetToken,handleRequest, handleVerification } =
+    useVerification(formData, setFormData);
+  
   const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
