@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import API from '../../../api.js';
+import API from '../../api.js';
 
 function PutSlides() {
   const [formData, setFormData] = useState({ slideImg: null });
