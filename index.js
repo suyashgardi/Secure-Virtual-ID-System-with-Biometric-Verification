@@ -63,7 +63,7 @@ async function verifyEmail(email) {
   }
   if (!result.valid){
 
-  return false;}
+  return true;}
 }
 
 cloudinary.config({
