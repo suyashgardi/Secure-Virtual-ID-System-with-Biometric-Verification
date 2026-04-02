@@ -4,38 +4,28 @@ import axios from "axios";
 import LivenessScanner from "./LivenessScanner";
 import RegisterForm from "./FormComponents/RegisterForm";
 import { useAuth } from "../CustomHooks/userAuth";
+import API from '../../../api.js';
 
 function Register() {
   const { user, isLoading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFaceVerified, setIsFaceVerified] = useState(false);
-
   const [stateNames, setStateNames] = useState([]);
   const [distNames, setDistNames] = useState([]);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    f_name: "",
-    m_name: "",
-    l_name: "",
-    dob: "",
-    gender: "",
-    address: "",
-    district: "",
-    state: "",
-    phone: "",
-    email: "",
-    photo: null,
-    facedata: null,
+    f_name: "", m_name: "", l_name: "", dob: "", gender: "",
+    address: "", district: "", state: "", phone: "", email: "",
+    photo: null, facedata: null,
   });
 
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const stateRes = await axios.get("/api/states");
+        const stateRes = await axios.get(`${API}/api/states`);
         setStateNames(stateRes.data);
-
-        const distRes = await axios.get("/api/district");
+        const distRes = await axios.get(`${API}/api/district`);
         setDistNames(distRes.data);
       } catch (error) {
         console.error("Error fetching initial data:", error);
@@ -48,10 +38,8 @@ function Register() {
     if (formData.district) {
       const fetchState = async () => {
         try {
-          const response = await axios.get(`/api/state/${formData.district}`);
-
+          const response = await axios.get(`${API}/api/state/${formData.district}`);
           const fetchedState = response.data[0]?.statename;
-
           if (fetchedState && formData.state !== fetchedState) {
             setFormData((prev) => ({ ...prev, state: fetchedState }));
           }
@@ -67,14 +55,14 @@ function Register() {
     const fetchDistricts = async () => {
       if (formData.state) {
         try {
-          const response = await axios.get(`/api/districts/${formData.state}`);
+          const response = await axios.get(`${API}/api/districts/${formData.state}`);
           setDistNames(response.data);
         } catch (error) {
           console.error("Error filtering districts:", error);
         }
       } else {
         try {
-          const distRes = await axios.get("/api/district");
+          const distRes = await axios.get(`${API}/api/district`);
           setDistNames(distRes.data);
         } catch (error) {
           console.error("Error resetting districts:", error);
@@ -85,50 +73,28 @@ function Register() {
   }, [formData.state]);
 
   const handleVerificationFailed = () => {
-      setFormData((prevData) => ({
-        ...prevData,
-        photo: null,
-      }));
-      setIsFaceVerified(false);
-    };
+    setFormData((prevData) => ({ ...prevData, photo: null }));
+    setIsFaceVerified(false);
+  };
 
   const handleChange = async (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleUploadFile = async (e) => {
-    setFormData({
-      ...formData,
-      photo: e.target.files[0],
-    });
+    setFormData({ ...formData, photo: e.target.files[0] });
     setIsFaceVerified(false);
   };
 
   const handleVerificationSuccess = (descriptorArray) => {
     setIsFaceVerified(true);
-    setFormData((prevData) => ({
-      ...prevData,
-      facedata: descriptorArray,
-    }));
+    setFormData((prevData) => ({ ...prevData, facedata: descriptorArray }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!isFaceVerified) {
-      alert("Please Complete Face Verification");
-      return;
-    }
-    if (!formData.photo) {
-      alert("Please Upload a profile photo!");
-      return;
-    }
-
-    
-
-    
+    if (!isFaceVerified) { alert("Please Complete Face Verification"); return; }
+    if (!formData.photo) { alert("Please Upload a profile photo!"); return; }
 
     setIsSubmitting(true);
     if (isSubmitting) return;
@@ -142,39 +108,21 @@ function Register() {
       const cloudinaryRes = await axios.post(
         "https://api.cloudinary.com/v1_1/dgdo0bswi/image/upload",
         cloudinaryData,
-        { withCredentials: false },
+        { withCredentials: false }
       );
 
       const photoUrl = cloudinaryRes.data.secure_url;
-      console.log("Success! Cloudinary URL:", photoUrl);
+      const finalUserData = { ...formData, photo: photoUrl };
 
-      const finalUserData = {
-        ...formData,
-        photo: photoUrl,
-      };
-
-      const response = await axios.post("/api/person", finalUserData, {
-        withCredentials: true,
-      });
+      await axios.post(`${API}/api/person`, finalUserData, { withCredentials: true });
 
       alert("User registered Successfully!");
-
       setFormData({
-        f_name: "",
-        m_name: "",
-        l_name: "",
-        dob: "",
-        gender: "",
-        address: "",
-        district: "",
-        state: "",
-        phone: "",
-        email: "",
-        photo: null,
-        facedata: null,
+        f_name: "", m_name: "", l_name: "", dob: "", gender: "",
+        address: "", district: "", state: "", phone: "", email: "",
+        photo: null, facedata: null,
       });
       setIsFaceVerified(false);
-
       navigate("/dashboard");
     } catch (error) {
       console.error("Registration Error: ", error);
@@ -195,7 +143,6 @@ function Register() {
           <p>Securely uploading your ID... Please wait.</p>
         </div>
       )}
-
       <RegisterForm
         isSubmitting={isSubmitting}
         formData={formData}
@@ -206,7 +153,6 @@ function Register() {
         stateNames={stateNames}
         distNames={distNames}
       />
-
       {formData.photo && !isFaceVerified && (
         <LivenessScanner
           uploadedIdFile={formData.photo}
