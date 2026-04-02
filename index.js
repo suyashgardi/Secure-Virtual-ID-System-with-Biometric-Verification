@@ -16,8 +16,8 @@ const port = process.env.PORT || 5000;
 app.use(
   cors({
     origin:
-      process.env.FRONTEND_URL ||
-      "https://secure-virtual-id-system-with-biome.vercel.app",
+      "https://secure-virtual-id-system-with-biome.vercel.app" || process.env.FRONTEND_URL 
+      ,
     credentials: true,
   }),
 );
