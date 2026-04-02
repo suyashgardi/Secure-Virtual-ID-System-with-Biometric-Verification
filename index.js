@@ -11,7 +11,7 @@ import crypto from "crypto";
 const app = express();
 const port = 5000;
 import dotenv from "dotenv";
-
+dotenv.config();
 app.use(cors({
   origin:  process.env.FRONTEND_URL ||  "https://secure-virtual-id-system-with-biome.vercel.app" ,
   credentials: true
@@ -22,7 +22,7 @@ app.use(bodyparser.urlencoded({ extended: true }));
 app.use(bodyparser.json());
 app.use(express.json());
 app.use(express.static("public"));
-dotenv.config();
+
 
 app.use(
   session({
