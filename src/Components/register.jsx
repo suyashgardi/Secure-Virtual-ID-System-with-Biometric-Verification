@@ -4,7 +4,7 @@ import axios from "axios";
 import LivenessScanner from "./LivenessScanner";
 import RegisterForm from "./FormComponents/RegisterForm";
 import { useAuth } from "../CustomHooks/userAuth";
-import API from '../../../api.js';
+import API from '../../api.js';
 
 function Register() {
   const { user, isLoading } = useAuth();
