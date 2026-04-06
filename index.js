@@ -15,7 +15,7 @@ dotenv.config();
 
 app.use(cors({
   // origin: "*",
-  origin:  "https://secure-virtual-id-system-with-biome.vercel.app/"|| process.env.FRONTEND_URL || "https://localhost:5173" ,
+  origin:  process.env.FRONTEND_URL ,
   credentials: true
 }));
 // app.use(cors({
