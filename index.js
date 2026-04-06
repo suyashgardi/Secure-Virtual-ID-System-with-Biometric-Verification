@@ -5,26 +5,20 @@ import bcrypt from "bcrypt";
 import { v2 as cloudinary } from "cloudinary";
 import cors from "cors";
 import session from "express-session";
-import { validate } from "deep-email-validator";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 5000;
 import dotenv from "dotenv";
 dotenv.config();
 
-app.use(cors({
-  // origin: "*",
-  origin:  process.env.FRONTEND_URL ,
-  credentials: true
-}));
-// app.use(cors({
-//   origin: "*",
-//   methods: "*",
-//   allowedHeaders: "*"
-// }));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  })
+);
 
-// app.use(cors());
 app.use(bodyparser.urlencoded({ extended: true }));
 app.use(bodyparser.json());
 app.use(express.json());
@@ -37,11 +31,11 @@ app.use(
     saveUninitialized: false,
     cookie: {
       maxAge: 1000 * 60 * 60,
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
       httpOnly: true,
-       sameSite: "none",
+      sameSite: "none",
     },
-  }),
+  })
 );
 
 const db = new pg.Pool({
@@ -51,26 +45,6 @@ const db = new pg.Pool({
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
 });
-
-// async function verifyEmail(email) {
-//   const result = await validate({
-//     email: email,
-//     validateRegex: true,
-//     validateMx: false,
-//     validateTypo: false,
-//     validateDisposable: false,
-//     validateSMTP: false,
-//   });
-//   if (!result.valid) {
-//     console.log(` Validation Failed For: "${email}"`);
-//     console.log(JSON.stringify(result.validators, null, 2));
-//   }
-//   if (result.valid) {
-//     return true;
-//   }
-
-//   return false;
-// }
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLD_NAME,
@@ -110,7 +84,6 @@ app.post("/api/sessions", async (req, res) => {
     }
   } catch (err) {
     console.error(err);
-
     res.status(500).json({ error: "Server Error" });
   }
 });
@@ -155,17 +128,10 @@ app.get("/api/getslides", async (req, res) => {
 
 app.post("/api/users", async (req, res) => {
   try {
-    let doesExist;
     let phone = req.body.phone;
     let password = req.body.password;
     let email = req.body.email;
     let confirmPassword = req.body.confirm_password;
-    if (email) {
-      doesExist = await verifyEmail(email);
-      if (!doesExist) {
-        return res.status(400).json({ error: " invalid email " });
-      }
-    }
 
     const checkQuery = "SELECT * FROM logins_db WHERE email = $1";
     const checkResult = await db.query(checkQuery, [email]);
@@ -206,11 +172,9 @@ app.post("/api/users", async (req, res) => {
           res.status(500).json({ error: "Error Signing up user" });
         }
       } else {
-        console.log("flag2dbhbjhsdj");
         return res.status(400).json({ error: "User already exists." });
       }
     } else {
-      console.log("flag #####3dbhbjhsdj");
       return res.status(400).json({
         error: "Invalid phone number. Please enter a 10-digit number.",
       });
@@ -297,8 +261,6 @@ app.post("/api/person", async (req, res) => {
   }
 });
 
-
-
 app.patch("/api/person", async (req, res) => {
   try {
     if (!req.session.user) {
@@ -306,6 +268,8 @@ app.patch("/api/person", async (req, res) => {
         .status(401)
         .json({ error: "Unauthorized. Please login first." });
     }
+
+    const email = req.body.email;
     let providedToken = req.body.resetToken;
 
     if (!providedToken) {
@@ -322,7 +286,6 @@ app.patch("/api/person", async (req, res) => {
       validResetTokens.delete(email);
       return res.status(401).json({ message: "Token has expired" });
     }
-
 
     const tempUrl = req.body.photo;
     let finalUrl = "";
@@ -341,7 +304,6 @@ app.patch("/api/person", async (req, res) => {
     const linkedacc = req.session.user.phone;
     const photoPath = finalUrl;
     const facedata = req.body.facedata;
-
     let idNumber = req.body.id_number;
 
     const query = `
@@ -423,6 +385,7 @@ app.get("/api/preusers", async (req, res) => {
     res.status(500).json({ error: "Failed Fetching " });
   }
 });
+
 app.get("/api/states", async (req, res) => {
   try {
     const query = `SELECT DISTINCT statename FROM states ORDER BY statename ASC`;
@@ -484,10 +447,10 @@ app.get("/api/districts/:statename", async (req, res) => {
 let tempOTPstorage = {};
 let otpTimeouts = {};
 const validResetTokens = new Map();
+
 app.post("/api/validation", async (req, res) => {
   try {
     console.log("triggered api");
-    let doesExist;
     let receiverEmail = req.body.email;
     let action = req.body.action;
     let caller = req.body.caller;
@@ -497,14 +460,6 @@ app.post("/api/validation", async (req, res) => {
       const emailPass = process.env.SOURCE_EMAIL_PASS;
 
       console.log("email: ", receiverEmail);
-
-      // if (receiverEmail) {
-      //   doesExist = await verifyEmail(receiverEmail);
-      //   if (!doesExist) {
-      //     console.log(" invalid ");
-      //     return res.status(400).json({ message: " invalid email " });
-      //   }
-      // }
 
       const query = `SELECT email FROM logins_db WHERE email=$1 ;`;
       const result = await db.query(query, [receiverEmail]);
@@ -546,7 +501,6 @@ app.post("/api/validation", async (req, res) => {
             const mailOptions = {
               from: emailUser,
               to: receiverEmail,
-
               subject: subject,
               text: `The verification code recieved is : ${OTP}\n`,
             };
@@ -615,7 +569,6 @@ app.patch("/api/newpassword", async (req, res) => {
       return res.status(401).json({ message: "Token has expired" });
     }
 
-   
     if (password === confirmPassword) {
       const saltRounds = 10;
       password = await bcrypt.hash(password, saltRounds);
