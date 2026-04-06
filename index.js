@@ -14,7 +14,8 @@ import dotenv from "dotenv";
 dotenv.config();
 
 app.use(cors({
-  origin:   process.env.FRONTEND_URL || "https://localhost:5173" ,
+  origin: "*",
+  // origin:  "https://secure-virtual-id-system-with-biometric-verification-n9buh0rok.vercel.app/"|| process.env.FRONTEND_URL || "https://localhost:5173" ,
   credentials: true
 }));
 // app.use(cors({
