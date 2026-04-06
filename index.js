@@ -14,7 +14,14 @@ dotenv.config();
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: function (origin, callback) {
+      const allowed = (process.env.FRONTEND_URL || "").replace(/\/$/, "");
+      if (!origin || origin === allowed) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
