@@ -12,6 +12,13 @@ const port = process.env.PORT || 5000;
 import dotenv from "dotenv";
 dotenv.config();
 
+app.get("/api/health", (req, res) => {
+  res.json({ 
+    frontendUrl: process.env.FRONTEND_URL,
+    corsOrigin: (process.env.FRONTEND_URL || "").replace(/\/$/, "")
+  });
+});
+
 app.use(
   cors({
     origin: function (origin, callback) {
