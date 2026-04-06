@@ -14,8 +14,8 @@ import dotenv from "dotenv";
 dotenv.config();
 
 app.use(cors({
-  origin: "*",
-  // origin:  "https://secure-virtual-id-system-with-biome.vercel.app/"|| process.env.FRONTEND_URL || "https://localhost:5173" ,
+  // origin: "*",
+  origin:  "https://secure-virtual-id-system-with-biome.vercel.app/"|| process.env.FRONTEND_URL || "https://localhost:5173" ,
   credentials: true
 }));
 // app.use(cors({
@@ -39,6 +39,7 @@ app.use(
       maxAge: 1000 * 60 * 60,
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
+       sameSite: "none",
     },
   }),
 );
