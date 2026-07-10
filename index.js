@@ -283,23 +283,23 @@ app.patch("/api/person", async (req, res) => {
         .json({ error: "Unauthorized. Please login first." });
     }
 
-    const email = req.body.email;
-    let providedToken = req.body.resetToken;
+    // const email = req.body.email;
+    // let providedToken = req.body.resetToken;
 
-    if (!providedToken) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
+    // if (!providedToken) {
+    //   return res.status(401).json({ message: "Unauthorized" });
+    // }
 
-    const storedTokenData = validResetTokens.get(email);
+    // const storedTokenData = validResetTokens.get(email);
 
-    if (!storedTokenData || storedTokenData.token !== providedToken) {
-      return res.status(401).json({ message: "Unauthorized: Invalid token" });
-    }
+    // if (!storedTokenData || storedTokenData.token !== providedToken) {
+    //   return res.status(401).json({ message: "Unauthorized: Invalid token" });
+    // }
 
-    if (Date.now() > storedTokenData.expires) {
-      validResetTokens.delete(email);
-      return res.status(401).json({ message: "Token has expired" });
-    }
+    // if (Date.now() > storedTokenData.expires) {
+    //   validResetTokens.delete(email);
+    //   return res.status(401).json({ message: "Token has expired" });
+    // }
 
     const tempUrl = req.body.photo;
     let finalUrl = "";
@@ -603,6 +603,24 @@ app.patch("/api/newpassword", async (req, res) => {
     console.log("the error : ", err);
     return res.status(500).json({ error: { err } });
   }
+});
+
+app.delete("/api/rmuser", async(req,res)=>{
+  console.log ("got here at least");
+  try{
+
+    let userID = req.body.id_number;
+    console.log("userid", userID);
+    const query = `DELETE FROM users WHERE id_number=$1`
+    const result = await db.query(query,[userID])
+    return res.status(200).json({userDeleted : true}) 
+
+
+  }catch{
+    return res.status(404).json({error : "error occured"})
+
+  }
+
 });
 
 app.listen(port, () => {
