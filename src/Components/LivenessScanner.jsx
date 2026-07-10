@@ -1,13 +1,13 @@
 import { useRef, useEffect, useState } from "react";
 import Webcam from "react-webcam";
 
-function LivenessScanner({ uploadedIdFile, onVerificationSuccess ,onVerificationFailed,isUpdating}) {
+function LivenessScanner({ uploadedIdFile, onVerificationSuccess ,onVerificationFailed,isUpdating,twoFacto}) {
   const webcamRef = useRef(null);
   const wsRef = useRef(null);
   const [serverMessage, setServerMessage] = useState("Converting ID Photo...");
   const [isVisible, setIsVisible] = useState(true);
   const isUpdatingRef = useRef(isUpdating);
-  
+  const twoFactoRef = useRef(twoFacto);
 
   const fileToBase64 = (file) => {
     return new Promise((resolve, reject) => {
@@ -23,24 +23,24 @@ function LivenessScanner({ uploadedIdFile, onVerificationSuccess ,onVerification
 
     const startPipeline = async () => {
       try {
-        const idPhotoBase64 = await fileToBase64(uploadedIdFile);
-        // sends connection request to  websocket open at port 8000and endpoint liveness
-        const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:8000";
-        wsRef.current = new WebSocket(`${WS_URL}/ws/liveness`);
+        
+        const idPhotoBase64 = twoFactoRef.current? null : await fileToBase64(uploadedIdFile);
 
-        // .onopen means when websocket accepts connection request 
+        // sends connection request to  websocket open at port 8000and endpoint liveness
+        wsRef.current = new WebSocket("ws://localhost:8000/ws/liveness");
+
+        // .onopen means when websocket accepts connection request
         wsRef.current.onopen = () => {
           setServerMessage("Connection open. Sending ID for verification...");
-          
+
           wsRef.current.send(
             JSON.stringify({
               type: "init",
               id_photo: idPhotoBase64,
-              not_registering: isUpdatingRef.current
+              not_registering: isUpdatingRef.current,
+              authenticating: twoFactoRef.current,
             }),
           );
-         
-          
         };
 
         wsRef.current.onmessage = (event) => {
@@ -70,10 +70,8 @@ function LivenessScanner({ uploadedIdFile, onVerificationSuccess ,onVerification
             clearInterval(streamInterval);
             wsRef.current.close();
             onVerificationSuccess(response.descriptor);
-            
           }
 
-         
           if (response.status === "failed") {
             clearInterval(streamInterval);
             wsRef.current.close();
@@ -81,7 +79,6 @@ function LivenessScanner({ uploadedIdFile, onVerificationSuccess ,onVerification
             alert(response.message);
             onVerificationFailed();
           }
-          
         };
       } catch (error) {
         console.error("Failed to start scanner:", error);
@@ -98,16 +95,16 @@ function LivenessScanner({ uploadedIdFile, onVerificationSuccess ,onVerification
       if (streamInterval) clearInterval(streamInterval);
       if (wsRef.current) wsRef.current.close();
     };
-  }, [uploadedIdFile, onVerificationSuccess,onVerificationFailed]);
+  }, [uploadedIdFile, onVerificationSuccess, onVerificationFailed]);
 
   const handleCancel = () => {
     if (wsRef.current) wsRef.current.close();
     onVerificationFailed();
-    setIsVisible(false); 
+    setIsVisible(false);
   };
 
-  if (!isVisible){
-    return null
+  if (!isVisible) {
+    return null;
   }
 
   return (
