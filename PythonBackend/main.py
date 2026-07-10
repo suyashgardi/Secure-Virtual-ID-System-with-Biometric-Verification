@@ -5,8 +5,7 @@ import numpy as np
 import helper as hp
 import json
 import uvicorn
-import urllib.request
-import os
+import urllib.request 
 
 app = FastAPI()
 
@@ -40,32 +39,39 @@ async def liveness_endpoint(websocket: WebSocket):
                 print("Received uploaded image. Analyzing ID Photo...")
                 id_image = hp.decode_base64_image(data.get("id_photo"))
                 not_registering=data.get("not_registering")
+                authenticating=data.get("authenticating")
+                print(authenticating)
+                if not authenticating:
+               
                 
-                if id_image is None:
-                    await websocket.send_json({"status": "failed", "message": "Corrupted ID image format."})
-                    continue
-                balanced_id = hp.balance_lighting(id_image)
-                rgb_id_image = cv2.cvtColor(balanced_id, cv2.COLOR_BGR2RGB)
-                encodings = face_recognition.face_encodings(rgb_id_image)
+                    if id_image is None:
+                        await websocket.send_json({"status": "failed", "message": "Corrupted ID image format."})
+                        continue
+                    balanced_id = hp.balance_lighting(id_image)
+                    rgb_id_image = cv2.cvtColor(balanced_id, cv2.COLOR_BGR2RGB)
+                    encodings = face_recognition.face_encodings(rgb_id_image)
+                    
+
+                    if len(encodings) == 0:
+                        await websocket.send_json({"status": "failed", "message": "No face found on the ID card."})
+                        continue
+                    elif len(encodings) > 1:
+                        await websocket.send_json({"status": "failed", "message": "Multiple faces detected on ID."})
+                        continue
                 
 
-                if len(encodings) == 0:
-                    await websocket.send_json({"status": "failed", "message": "No face found on the ID card."})
-                    continue
-                elif len(encodings) > 1:
-                    await websocket.send_json({"status": "failed", "message": "Multiple faces detected on ID."})
-                    continue
-                
-
-                session_id_descriptor = encodings[0]
+                    session_id_descriptor = encodings[0]
+                    
+                else:
+                    session_id_descriptor = np.array(authenticating)
+                    print("Authenticating user with existing descriptor.")
                 
                 if not not_registering:
                 
                     try:
                         print("Checking database for duplicate faces...")
                     
-                        NODE_API_URL = os.environ.get("NODE_API_URL", "http://localhost:5000")
-                        req = urllib.request.Request(f"{NODE_API_URL}/api/preusers")
+                        req = urllib.request.Request("http://localhost:5000/api/preusers")
                         with urllib.request.urlopen(req) as response:
                             existing_users = json.loads(response.read().decode())
                             
